@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduTrack Pro - Attendance Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background-color: #4F46E5;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="app" class="min-h-screen">
+        <!-- Login Screen -->
+        <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
+            <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+                <h2 class="text-2xl font-bold text-center text-indigo-600 mb-6">EduTrack Pro</h2>
+                <div class="space-y-4">
+                    <input type="text" id="username" placeholder="Username" class="w-full p-3 border rounded-lg">
+                    <input type="password" id="password" placeholder="Password" class="w-full p-3 border rounded-lg">
+                    <input type="text" id="twoFactorCode" placeholder="2FA Code" class="w-full p-3 border rounded-lg">
+                    <button onclick="login()" class="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700">Login</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard -->
+        <div id="dashboard" class="hidden">
+            <!-- Sidebar -->
+            <div class="fixed left-0 top-0 h-full w-64 bg-indigo-600 text-white p-4 custom-scrollbar">
+                <h2 class="text-xl font-bold mb-8">EduTrack Pro</h2>
+                <nav class="space-y-2">
+                    <a href="#" class="block p-3 rounded hover:bg-indigo-700" onclick="showSection('attendance')">
+                        <i class="bi bi-calendar-check me-2"></i> Attendance
+                    </a>
+                    <a href="#" class="block p-3 rounded hover:bg-indigo-700" onclick="showSection('students')">
+                        <i class="bi bi-people me-2"></i> Students
+                    </a>
+                    <a href="#" class="block p-3 rounded hover:bg-indigo-700" onclick="showSection('materials')">
+                        <i class="bi bi-book me-2"></i> Study Materials
+                    </a>
+                    <a href="#" class="block p-3 rounded hover:bg-indigo-700" onclick="showSection('notifications')">
+                        <i class="bi bi-bell me-2"></i> Notifications
+                    </a>
+                </nav>
+            </div>
+
+            <!-- Main Content -->
+            <div class="ml-64 p-8">
+                <!-- Attendance Section -->
+                <div id="attendance-section" class="hidden">
+                    <h2 class="text-2xl font-bold mb-6">Today's Attendance</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h3 class="font-semibold mb-2">Total Students</h3>
+                            <p class="text-2xl text-indigo-600">45</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h3 class="font-semibold mb-2">Present Today</h3>
+                            <p class="text-2xl text-green-600">40</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <h3 class="font-semibold mb-2">Absent Today</h3>
+                            <p class="text-2xl text-red-600">5</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold">Mark Attendance</h3>
+                            <input type="date" class="border rounded p-2" id="attendance-date">
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="bg-gray-50">
+                                        <th class="p-3 text-left">Roll No</th>
+                                        <th class="p-3 text-left">Name</th>
+                                        <th class="p-3 text-left">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="attendance-table">
+                                    <!-- Dynamically populated -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Students Section -->
+                <div id="students-section" class="hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold">Students</h2>
+                        <button onclick="showAddStudentModal()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                            Add Student
+                        </button>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-6">
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead>
+                                    <tr class="bg-gray-50">
+                                        <th class="p-3 text-left">Roll No</th>
+                                        <th class="p-3 text-left">Name</th>
+                                        <th class="p-3 text-left">Email</th>
+                                        <th class="p-3 text-left">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="students-table">
+                                    <!-- Dynamically populated -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Materials Section -->
+                <div id="materials-section" class="hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold">Study Materials</h2>
+                        <button onclick="showAddMaterialModal()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                            Upload Material
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="materials-grid">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+
+                <!-- Notifications Section -->
+                <div id="notifications-section" class="hidden">
+                    <h2 class="text-2xl font-bold mb-6">Notifications</h2>
+                    <div class="space-y-4" id="notifications-list">
+                        <!-- Dynamically populated -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock data
+        const students = [
+            { id: 1, rollNo: "001", name: "John Doe", email: "john@example.com" },
+            { id: 2, rollNo: "002", name: "Jane Smith", email: "jane@example.com" }
+        ];
+
+        const materials = [
+            { id: 1, title: "Mathematics Notes", subject: "Mathematics", date: "2024-01-20" },
+            { id: 2, title: "Physics Lab Manual", subject: "Physics", date: "2024-01-19" }
+        ];
+
+        const notifications = [
+            { id: 1, title: "Attendance Update", message: "Today's attendance has been updated", date: "2024-01-20" },
+            { id: 2, title: "New Material", message: "New study material uploaded", date: "2024-01-19" }
+        ];
+
+        // Authentication
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const twoFactorCode = document.getElementById('twoFactorCode').value;
+
+            if (username && password && twoFactorCode) {
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                showSection('attendance');
+            } else {
+                alert('Please fill in all fields');
+            }
+        }
+
+        // Navigation
+        function showSection(section) {
+            document.getElementById('attendance-section').classList.add('hidden');
+            document.getElementById('students-section').classList.add('hidden');
+            document.getElementById('materials-section').classList.add('hidden');
+            document.getElementById('notifications-section').classList.add('hidden');
+
+            document.getElementById(`${section}-section`).classList.remove('hidden');
+            
+            if (section === 'attendance') loadAttendance();
+            if (section === 'students') loadStudents();
+            if (section === 'materials') loadMaterials();
+            if (section === 'notifications') loadNotifications();
+        }
+
+        // Load data functions
+        function loadAttendance() {
+            const tbody = document.getElementById('attendance-table');
+            tbody.innerHTML = students.map(student => `
+                <tr class="border-t">
+                    <td class="p-3">${student.rollNo}</td>
+                    <td class="p-3">${student.name}</td>
+                    <td class="p-3">
+                        <select class="border rounded p-1" onchange="markAttendance(${student.id}, this.value)">
+                            <option value="present">Present</option>
+                            <option value="absent">Absent</option>
+                        </select>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadStudents() {
+            const tbody = document.getElementById('students-table');
+            tbody.innerHTML = students.map(student => `
+                <tr class="border-t">
+                    <td class="p-3">${student.rollNo}</td>
+                    <td class="p-3">${student.name}</td>
+                    <td class="p-3">${student.email}</td>
+                    <td class="p-3">
+                        <button class="text-blue-600 hover:text-blue-800" onclick="editStudent(${student.id})">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadMaterials() {
+            const grid = document.getElementById('materials-grid');
+            grid.innerHTML = materials.map(material => `
+                <div class="bg-white p-4 rounded-lg shadow">
+                    <h3 class="font-semibold mb-2">${material.title}</h3>
+                    <p class="text-gray-600 mb-2">${material.subject}</p>
+                    <p class="text-sm text-gray-500">${material.date}</p>
+                    <button class="mt-2 text-indigo-600 hover:text-indigo-800">Download</button>
+                </div>
+            `).join('');
+        }
+
+        function loadNotifications() {
+            const list = document.getElementById('notifications-list');
+            list.innerHTML = notifications.map(notification => `
+                <div class="bg-white p-4 rounded-lg shadow">
+                    <h3 class="font-semibold">${notification.title}</h3>
+                    <p class="text-gray-600 mt-1">${notification.message}</p>
+                    <p class="text-sm text-gray-500 mt-2">${notification.date}</p>
+                </div>
+            `).join('');
+        }
+
+        // Other functions
+        function markAttendance(studentId, status) {
+            console.log(`Marked student ${studentId} as ${status}`);
+        }
+
+        function showAddStudentModal() {
+            alert('Add Student Modal (To be implemented)');
+        }
+
+        function showAddMaterialModal() {
+            alert('Add Material Modal (To be implemented)');
+        }
+
+        function editStudent(studentId) {
+            alert(`Edit Student ${studentId} (To be implemented)`);
+        }
+
+        // Initialize dashboard
+        document.getElementById('attendance-date').valueAsDate = new Date();
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
